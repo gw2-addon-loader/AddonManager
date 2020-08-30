@@ -3,7 +3,24 @@
 
 class Gui
 {
+	struct ToggleButton
+	{
+		void init();
+		void act(Gui& gui);
+		ImVec2 pos;
+		ImVec2 size;
+	} toggleButton;
+
+	struct MainWindow
+	{
+		bool visible;
+		void init();
+		void act();
+	} mainWindow;
+
 public:
+	Gui();
+
 	void init();
 	void draw();
 	void deinit();

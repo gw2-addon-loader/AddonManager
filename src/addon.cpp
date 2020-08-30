@@ -22,6 +22,20 @@ addon_instance& gAddon()
 	return gInst;
 }
 
+void log_text_fmt(gw2al_log_level level, const wchar_t* source, const wchar_t* fmt, ...)
+{
+	static wchar_t buf[4096];
+
+	va_list arg;
+	va_start(arg, fmt);
+
+	vswprintf(buf, 4096, fmt, arg);
+
+	va_end(arg);
+
+	gInst.api->log_text(level, (wchar_t*)source, buf);
+}
+
 template<>
 inline lib_imgui<Gui>& lib_imgui<Gui>::instance()
 {
