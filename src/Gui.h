@@ -16,6 +16,7 @@ class Gui
 		bool visible;
 		void init();
 		void act();
+		int activeIndex = -1;
 	} mainWindow;
 
 public:

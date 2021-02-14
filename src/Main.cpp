@@ -37,6 +37,8 @@ void Main::updateAddonList()
 				item.status = GW2AL_FAIL;
 				item.hashedName = gAddon().api->hash_name(item.name);
 				item.dsc = nullptr;
+				item.showConfigPage = false;
+				item.menuShowProc = nullptr;
 
 				/*
 				constexpr size_t mbstrSz = 4096;
@@ -66,6 +68,11 @@ void Main::updateAddonStatuses()
 			i.status = GW2AL_OK;
 		else //otherwise try to load it again and store load error in status
 			i.status = gAddon().api->load_addon(i.name);
+
+		wchar_t sMenuProc[2048];
+		wsprintf(sMenuProc, L"%s_ExternalShowMenu", i.name);
+		auto sMenuHa = gAddon().api->hash_name(sMenuProc);
+		i.menuShowProc = (ExternalMenuShowProcType)gAddon().api->query_function(sMenuHa);
 	}
 }
 

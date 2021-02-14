@@ -63,54 +63,93 @@ void Gui::MainWindow::act()
 
 	ImGui::Begin("GW2 addon manager");
 
+	ImGui::Text("Active addons");
+	ImGui::NewLine();
+
+	int idx = 0;
+	char perAddonTag[256];
+
 	for (const auto& i : gAddon().main.GetAddonList())
 	{
+		++idx;
+		if ((i.status != GW2AL_OK) || !i.dsc)
+			continue;
+	
+		ImGui::Text("%S v%u.%u build %u", i.name, i.dsc->majorVer, i.dsc->minorVer, i.dsc->revision);
+
+		sprintf_s(perAddonTag, "O##%S", i.name);
+
+		ImGui::SameLine();
+		if (ImGui::Button(perAddonTag) && idx != activeIndex)
+			activeIndex = idx;
+		
+		if (idx == activeIndex)
+		{
+			ImGui::NewLine();
+			ImGui::Text("%S", i.dsc->description);
+			if (i.menuShowProc)
+			{
+				sprintf_s(perAddonTag, "Show addon menu##%S", i.name);
+				if (ImGui::Button(perAddonTag))
+				{
+					i.menuShowProc();
+				}
+			}		
+			//TODO: make this work
+			ImGui::SameLine();
+			ImGui::Button("Update");
+			ImGui::SameLine();
+			ImGui::Button("Reload");
+			ImGui::SameLine();
+			ImGui::Button("Disable");
+		}
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Inactive addons");
+	ImGui::NewLine();
+
+	for (const auto& i : gAddon().main.GetAddonList())
+	{
+		if ((i.status == GW2AL_OK) && i.dsc)
+			continue;
+
 		ImGui::Text("%S", i.name);
 
-		if (i.status == GW2AL_OK)
+		switch (i.status)
 		{
-			ImGui::SameLine();
-			if (!i.dsc)
-			{				
-				ImGui::Text("E: [no description found]");
-				continue;
-			} 
-
-			ImGui::Text("v%u.%u build %u", i.dsc->majorVer, i.dsc->minorVer, i.dsc->revision);
-			//TODO: make it a hover popup
-			ImGui::Text("%S", i.dsc->description);
-		}
-		else {
-			ImGui::SameLine();
-			switch (i.status)
-			{
-			case GW2AL_BAD_DLL:
-				ImGui::Text("E: [missing one of export functions]");
-				break;
-			case GW2AL_NOT_FOUND:
-				ImGui::Text("E: [dll not found]");
-				break;
-			case GW2AL_DEP_NOT_LOADED:
-				ImGui::Text("E: [dependency missing]");
-				break;
-			case GW2AL_DEP_OUTDATED:
-				ImGui::Text("E: [dependency outdated]");
-				break;
-			default:
-				ImGui::Text("E: [general failure]");
-				break;
-			}
+		case GW2AL_BAD_DLL:
+			ImGui::Text("E: [missing one of export functions]");
+			break;
+		case GW2AL_NOT_FOUND:
+			ImGui::Text("E: [dll not found]");
+			break;
+		case GW2AL_DEP_NOT_LOADED:
+			ImGui::Text("E: [dependency missing]");
+			break;
+		case GW2AL_DEP_OUTDATED:
+			ImGui::Text("E: [dependency outdated]");
+			break;
+		case GW2AL_OK:
+			ImGui::Text("E: [no description found]");
+			break;
+		default:
+			ImGui::Text("E: [general failure]");
+			break;
 		}
 
-		//TODO: make this work
-		ImGui::Button("Update");
-		ImGui::SameLine();
-		ImGui::Button("Reload");
-		ImGui::SameLine();
-		ImGui::Button("Disable");
-		ImGui::SameLine();
-		ImGui::Button("Open config menu");
+		ImGui::NewLine();
 	}
+
+	ImGui::Separator();
+
+	//TODO: make this work
+	ImGui::SameLine();
+	ImGui::Button("Update all");
+	ImGui::SameLine();
+	ImGui::Button("Reload all");
+	ImGui::SameLine();
+	ImGui::Button("Disable all");
 	
 	ImGui::End();
 }
